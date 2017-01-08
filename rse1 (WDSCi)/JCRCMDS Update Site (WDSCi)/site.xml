@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.jcrcmds.core_1.0.0.b002.jar" id="com.jcrcmds.core" version="1.0.0.b002">
+      <category name="com.jcrcmds"/>
+   </feature>
+   <category-def name="com.jcrcmds" label="JCRCMDS for WDSCi 7.0">
+      <description>
+         &quot;JCRCMDS&quot; is a bridge to the JCRCMDS IBM i library of Craig Rutledge. The home of the JCRCMDS library is at http://www.jcrcmds.com/.
+      </description>
+   </category-def>
+</site>
