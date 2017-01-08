@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+      	
+      	<!--
+      	  ==========================================
+      	    JCRCMDS popup menu extension
+      	  ==========================================
+      	-->
+
+   <extension
+         point="com.ibm.lpex.preload">
+      <preload
+            class="com.jcrcmds.core.lpex.Preload">
+      </preload>
+   </extension>
+      	
+      	<!--
+      	  ==========================================
+      	    JCRCMDS preferences
+      	  ==========================================
+      	-->
+
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.jcrcmds.core.preferencepages.JcrCmds"
+            name="%JCRCMDS_Utility"
+            id="com.jcrcmds.core.preferencepages.JcrCmds"/>
+   </extension>
+   
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.jcrcmds.core.preferences.PreferencesInitializer">
+      </initializer>
+   </extension>
+
+</plugin>

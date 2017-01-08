@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JCRCMDS Base Plug-in (required)
+Bundle-SymbolicName: com.jcrcmds.base
+Bundle-Version: 1.0.0.b002
+Bundle-Activator: com.jcrcmds.base.JcrCmdsBasePlugin
+Bundle-Vendor: JCRCMDS Project Team
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ com.ibm.etools.iseries.toolbox
+Bundle-ActivationPolicy: lazy
+Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: com.jcrcmds.base.shared.exceptions,
+ com.jcrcmds.base.shared.helper,
+ com.jcrcmds.base.shared.host,
+ com.jcrcmds.base.shared.logger

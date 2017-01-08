@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.jcrcmds.core"
+      label="JCRCMDS Core"
+      version="1.0.0.b002"
+      provider-name="JCRCMDS Project Team">
+
+   <description url="https://sourceforge.net/projects/jcrcmds/">
+      The &quot;JCRCMDS Core Feature&quot; is a bridge to the JCRCMDS IBM i library of Craig Rutledge. The JCRCMDS library is not part of the feature and must be downloaded from Craig&apos;s homepage and installed deparately. The home of the JCRCMDS library is at http://www.jcrcmds.com/.
+   </description>
+
+   <copyright url="https://sourceforge.net/projects/jcrcmds/">
+      Copyright (c) 2016-2017 JCRCMDS Project Team. All rights reserved.
+   </copyright>
+
+   <license url="http://www.eclipse.org/legal/cpl-v10.html">
+      This program and the accompanying materials are made available
+under the terms of the Common Public License v1.0 which accompanies
+this distribution, and is available at http://www.eclipse.org/legal/cpl-v10.html.
+   </license>
+
+   <url>
+      <discovery label="JCRCMDS Project Home" url="https://sourceforge.net/projects/jcrcmds/"/>
+      <discovery label="Craig Rutledge - Open Source iSeries Tools" url="http://www.jcrcmds.com/"/>
+      <discovery label="Tools/400" url="http://www.tools400.de"/>
+   </url>
+
+   <plugin
+         id="com.jcrcmds.base"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.jcrcmds.base.rse"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.jcrcmds.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
