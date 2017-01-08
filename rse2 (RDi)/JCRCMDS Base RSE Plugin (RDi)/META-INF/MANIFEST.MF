@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JCRCMDS Base RSE Plugin (required)
+Bundle-SymbolicName: com.jcrcmds.base.rse
+Bundle-Version: 1.0.0.b002
+Bundle-Activator: com.jcrcmds.base.rse.JcrCmdsBaseRSEPlugin
+Bundle-Vendor: JCRCMDS Project Team
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.ui.ide,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.rse.core,
+ org.eclipse.rse.services,
+ org.eclipse.rse.ui,
+ com.ibm.etools.systems.editor,
+ com.ibm.etools.iseries.toolbox,
+ com.ibm.etools.iseries.subsystems.qsys,
+ com.ibm.etools.iseries.services.qsys,
+ com.jcrcmds.base
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Eclipse-LazyStart: true
+Export-Package: com.jcrcmds.base.rse.shared.connection,
+ com.jcrcmds.base.rse.shared.host
+Bundle-ClassPath: .
