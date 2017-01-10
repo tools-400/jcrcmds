@@ -464,6 +464,8 @@
 
 		<echo>Cleaning upload directory ...</echo>
 
+		<mkdir dir="${build.upload.dir.files}" />
+		
 		<delete includeemptydirs="true">
 			<fileset dir="${workspace.home}\${build.project.name}\upload" includes="**/*" />
 		</delete>
