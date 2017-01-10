@@ -1,11 +1,11 @@
 <html>
     <head>
         <meta http-equiv="cache-control" content="no-cache">
-        <meta name="description" content="JCRCMDS Plug-In Update Site">
+        <meta name="description" content="JCRCMDS Plug-in Update Site">
         <meta name="author" content="JCRCMDS Project Team">
-        <meta name="keywords" content="JCRCMDS, Plugin, RDP, RDI, Eclipse, AS400">
+        <meta name="keywords" content="JCRCMDS, Plugin, RDP, RDI, WDSCI, Eclipse, AS400">
         <link href="assets/stylesheet.css" rel="stylesheet" type="text/css" />
-        <title>JCRCMDS Update Site</title>
+        <title>JCRCMDS Plug-in Update Site @IDE_PRODUCT_NAME_SHORT@</title>
     </head>
     <body>
 		<table>
@@ -23,25 +23,52 @@
         <br>
         @VERSION_INFO@
         <br>
-        <h2>Example Screen Shot</h2>
-        <p class="indent">Right-Click your in your Lpex editor to open the <i>'JCRCMDS'</i> context menu.<br><br></p>
-        <img class="indent" src="./assets/example.png" alt="WDSCi: Execute JCRHFD from Lpex editor">
-        <br><br>
-        <h2>Installing The Plug-In</h2>
-        <p class="indent">From the main menu, select "Help > Install New Software..." to enter the "Install" dialog.<br><br>
-        Then Drag-and-Drop the URL of the update site into the "Work with:" field:<br><br></p>
-        <img class="indent" src="./assets/installDragDrop.png" alt="WDSCi: Install new software">
-        <br><br>
-        <h2>Download Plug-In and i5 Component</h2>
-        <p class="indent">Follow the installation steps given in <a href="./assets/readme_first.txt">readme_first.txt</a> to install
-                          JCRCMDS on your system. The zip file includes a local update site for the plug-in as well. The JCRCMDS library
-                          must be separately downloaded from Craig Rutledge's homepage at
-                          <a target="_JCRCMDS" href="http://www.jcrcmds.com/">http://www.jcrcmds.com/</a>.<br><br>
+        <h2>Installing the Plug-In</h2>
+        <h3>Using the JCRCMDS Update Site</h3>
+        <p>From the main menu, select "Help > Software Updates > Find and Install..." to enter the "Install/Update" dialog.<br><br>
+        Select "Search for new features to install" and press the [Next] button:<br><br></p>
+        <img class="indent" src="./assets/wdsci_install_new_software.gif" alt="WDSCi: Install new software">
         <p>
-        <div class=indent>
-        <!--DOWNLOAD-->
-        </div>
+        Now click the [New Remote Site...] button to enter the URL of the JCRCMDS update site <a href="@UPDATE_SITE_URL@">@UPDATE_SITE_URL@</a>:
+        <p>
+        <img class="indent" src="./assets/wdsci_remote_update_site.gif" alt="WDSCi: JCRCMDS Update Site">
+        <p>
+        Then click the [Finish] button and follow the instructions given on the following pages.
+        <h3>Using a Local Update Directory</h3>
+        <p>
+        Go to the JCRCMDS <a href="@PROJECT_HOME@" target="_blank">download page</a> at SourceForge and download the zip file for your environment.
+        <p>
+        The follow these steps to create your local update site:
+        <p>
+        <ul>
+        <li>Unpack the zip file to a directory of your choice. This directory will be your local update site.</li>
+        <li>From the main menu, select "Help > Software Updates > Find and Install..." to enter the "Install/Update" dialog.</li>
+        <li>Press the [New Local Site...] button to add your directory to the list of available update sites.</li>
+        </ul>
         <br>
+        <h3>Using a Local Update Archive</h3>
+        <p>
+        Go to the JCRCMDS <a href="@PROJECT_HOME@" target="_blank">download page</a> at SourceForge and download the zip file for your environment.
+        <p>
+        The follow these steps to create your local update site:
+        <p>
+        <ul>
+        <li>Download the zip file to a directory of your choice. This zip file will be your local update archive.</li>
+        <li>Consider removing the version number from the name of the zip file to keep the name stable for further updates.</li>
+        <li>From the main menu, select "Help > Software Updates > Find and Install..." to enter the "Install/Update" dialog.</li>
+        <li>Press the [New Archived Site...] button to add the zip file to the list of available update sites.</li>
+        </ul>
+        <br>
+        <p>
+		The following terms are trademarks of the IBM Corporation in the United States or other countries or both:
+		<ul>
+		<li>@IDE_PRODUCT_NAME_LONG@</li>
+		</ul>        
+        <br>
+        <hr>
+        <table border="0" class="copyright">
+        <tr><td class="copyright" align="left" width="50%">Version: @VERSION_NUMBER@ - Copyright: @YEAR@, JCRCMDS project owners</td><td class="copyright" align="right" width="50%">Updated: @TODAY@</td></tr>
+        </table>
         <br>
     </body>
 </html>
