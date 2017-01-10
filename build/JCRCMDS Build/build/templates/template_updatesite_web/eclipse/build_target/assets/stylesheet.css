@@ -42,16 +42,32 @@ h3 {
 }
 
 /*
+ *  Table header.
+ */
+
+th {
+    color: #000000; line-height: 1.6em; font-weight: bold; font-style: italic;
+}
+
+/*
+ *  Table as grid.
+ */
+
+.grid {
+    border-collapse: collapse; border: 1px solid lightgrey; padding: 4px;
+}
+
+/*
  *  Beta Version Highlighter.
  */
 
-.beta    { padding:2px; padding-left: 25px; background: #FF3300; color: #000000; line-height: 1.6em; font-weight: bold; font-style: italic; }
+.beta    { padding:2px; padding-left: 25px; background: #FF0000; color: #000000; line-height: 1.6em; font-weight: bold; font-style: italic; }
 
 /*
  *  Release Version Highlighter.
  */
 
-.release { padding:2px; padding-left: 25px; background: #4EB9BA; color: #000000; line-height: 1.6em; font-weight: bold; font-style: italic; }
+.release { padding:2px; padding-left: 25px; background: #7BCDFF; color: #000000; line-height: 1.6em; font-weight: bold; font-style: italic; }
 
 /*
  *  Default body style.
