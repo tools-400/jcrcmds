@@ -73,6 +73,16 @@
 		</classpath>
 	</taskdef>
 
+	<!-- Include iSphere Ant Contrib tasks -->
+	<taskdef resource="biz/isphere/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="${basedir}/lib/iSphere-ant-standalone.jar" />
+			<pathelement location="${basedir}/lib/jacob.jar" />
+			<pathelement location="${basedir}/lib/jsch-0.1.51.jar" />
+			<pathelement location="${basedir}/lib/jzlib-1.1.3.jar" />
+		</classpath>
+	</taskdef>
+
 	<!-- Load project names and new version number -->
 	<property file="build.properties" />
 
@@ -208,12 +218,12 @@
 		<then>
 			<property name="target.ide.root.update.site.url" value="${sf.root.url}/${beta.dir}/eclipse/${target.ide.sf.dir}/" />
 			<property name="target.ide.root.help.site.url" value="${sf.root.url}/${beta.dir}/${sf.dir.updatesite.help.dir}/" />
-			<property name="site.xml.property.url" value="${sf.root.master.url}/${beta.dir}/eclipse/${target.ide.sf.dir}" />
+			<property name="site.xml.property.url" value="${sf.root.master.dl.url}/${beta.dir}/eclipse/${target.ide.sf.dir}" />
 		</then>
 		<else>
 			<property name="target.ide.root.update.site.url" value="${sf.root.url}/eclipse/${target.ide.sf.dir}/" />
 			<property name="target.ide.root.help.site.url" value="${sf.root.url}/${sf.dir.updatesite.help.dir}/" />
-			<property name="site.xml.property.url" value="${sf.root.master.url}/eclipse/${target.ide.sf.dir}" />
+			<property name="site.xml.property.url" value="${sf.root.master.dl.url}/eclipse/${target.ide.sf.dir}" />
 		</else>
 	</if>
 
@@ -350,7 +360,7 @@
 	<target name="createSourceForgeFiles" depends="checkBuildTarget,cleanUploadDir,checkProjectDocument,checkPdfFile,updatePdfFile,createSourceForgeDownloadFiles,createSourceForgeWebPages,createSourceForgeHelp,createSourceForgeHome,createSourceForgeMaintenance" description="Create SourceForge files and web pages">
 
 		<echo>+------------------------------------------------------+</echo>
-		<echo>|  Check files in '${build.public.project.name} Build/upload/...'           |</echo>
+		<echo>|  Check files in '${build.public.project.name} Build/upload/...'</echo>
 		<echo>|                                                      |</echo>
 		<echo>|  Then proceed with:   uploadSourceForgeFiles         |</echo>
 		<echo>+------------------------------------------------------+</echo>
@@ -543,6 +553,7 @@
 			</fileset>
 		</copy>
 		
+		<echo>Adding 'url' property to 'site.xml' ...</echo>
 		<replaceregexp match="${site.xml.property.url.regex}" replace="${site.xml.property.url.replace}" flags="s" byline="false">
 			<fileset dir="${build.upload.dir.files.eclipse}\${target.ide.sf.dir}" includes="site.xml" />
 		</replaceregexp>
@@ -645,6 +656,11 @@
 
 		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\.htaccess" token="@BUILD_TARGET@" value="${target.ide.sf.dir}" />
 		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\.htaccess" token="@BETA_VERSION@" value="${beta.dir}" />
+		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\.htaccess" token="@VERSION_NUMBER@" value="${build.version}" />
+		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\.htaccess" token="@TODAY@" value="${today.timestamp}" />
+		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\.htaccess" token="@SF_FTP_PROJECT@" value="${sf.ftp.project}" />
+		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\.htaccess" token="@SF_MASTER_DL@" value="${sf.root.master.dl.url}" />
+		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\.htaccess" token="@SF_DOWNLOADS@" value="${sf.root.downloads.url}" />
 		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\.htaccess" token="/./" value="/" />
 
 		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\index.html" token="@VERSION_INFO@" value="${version.info}" />
@@ -657,8 +673,6 @@
 		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\index.html" token="@VERSION_NUMBER@" value="${build.version}" />
 		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\index.html" token="@PROJECT_HOME@" value="${sf.home.url}" />
 		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\index.html" token="@PROJECT_HELP@" value="${sf.help.url}" />
-
-		<replace file="${build.upload.dir.web.eclipse}/${target.ide.sf.dir}\.htaccess" token="@SF_FTP_PROJECT@" value="${sf.ftp.project}" />
 
 		<eclipse.refreshLocal resource="${build.project.name}" depth="infinite" />
 
@@ -957,7 +971,7 @@
     * =====================================================================
     *   Updates the PDF file from 'project.doc'.
     * ===================================================================== -->
-	<target name="updatePdfFile" unless="pdf.isUpToDate">
+	<target name="updatePdfFile" unless="pdf.isUpToDate" description="Updates the PDF file">
 		
 		<if>
 			<equals arg1="${build.files.enabled}" arg2="true" />
