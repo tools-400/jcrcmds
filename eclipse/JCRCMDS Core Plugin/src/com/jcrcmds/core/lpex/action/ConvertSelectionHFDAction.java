@@ -57,7 +57,7 @@ public class ConvertSelectionHFDAction extends AbstractLpexAction implements IRe
                 return;
             }
 
-            JCRHFDConverter converter = new JCRHFDConverter(connectionName, system);
+            JCRHFDConverter converter = new JCRHFDConverter(system);
             converter.convertAsync(sourceLines, getMemberType(editor), this);
 
         } catch (Throwable e) {

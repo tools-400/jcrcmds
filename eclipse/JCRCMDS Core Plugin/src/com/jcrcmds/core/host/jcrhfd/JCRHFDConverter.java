@@ -43,11 +43,9 @@ public class JCRHFDConverter {
     /** Record field */
     public static final int SRCDTA_INDEX = 2;
 
-    private String connectionName;
     private AS400 system;
 
-    public JCRHFDConverter(String connectionName, AS400 system) {
-        this.connectionName = connectionName;
+    public JCRHFDConverter(AS400 system) {
         this.system = system;
     }
 
@@ -78,7 +76,7 @@ public class JCRHFDConverter {
         SequentialFile remoteInputWorkFile = new SequentialFile(system, new QSYSObjectPathName(workLibrary, workFile, workMember1, "MBR").getPath());
 
         if (!checkLibrary(remoteInputWorkFile)) {
-            throw new LibraryNotFoundException(remoteInputWorkFile.getLibraryName());
+            throw new LibraryNotFoundException(getLibraryName(remoteInputWorkFile));
         }
 
         if (!checkFile(remoteInputWorkFile)) {
@@ -86,15 +84,15 @@ public class JCRHFDConverter {
         }
 
         if (!checkFileMember(remoteInputWorkFile)) {
-            createFileMember(remoteInputWorkFile, workMember1, "JCR input data");
+            createFileMember(remoteInputWorkFile, workMember1);
         }
 
-        initializeFileMember(remoteInputWorkFile, workMember1, memberType);
+        initializeFileMember(remoteInputWorkFile, workMember1, memberType, "JCR input data"); //$NON-NLS-1$
 
         SequentialFile remoteOutputWorkFile = new SequentialFile(system, new QSYSObjectPathName(workLibrary, workFile, workMember2, "MBR").getPath());
 
         if (!checkLibrary(remoteOutputWorkFile)) {
-            throw new LibraryNotFoundException(remoteOutputWorkFile.getLibraryName());
+            throw new LibraryNotFoundException(getLibraryName(remoteOutputWorkFile));
         }
 
         if (!checkFile(remoteOutputWorkFile)) {
@@ -102,15 +100,20 @@ public class JCRHFDConverter {
         }
 
         if (!checkFileMember(remoteOutputWorkFile)) {
-            createFileMember(remoteOutputWorkFile, workMember2, "JCR output data");
+            createFileMember(remoteOutputWorkFile, workMember2);
         }
 
-        initializeFileMember(remoteOutputWorkFile, workMember2, memberType);
+        initializeFileMember(remoteOutputWorkFile, workMember2, memberType, "JCR output data"); //$NON-NLS-1$
 
         /*
          * Upload selected source lines
          */
         upload(remoteInputWorkFile, sourceLines);
+
+        /*
+         * Add JCR product library
+         */
+        boolean isProductLibrary = addProductLibrary(remoteInputWorkFile, preferences.getProductLibrary(), "*FIRST"); //$NON-NLS-1$
 
         /*
          * Call JCRHFD
@@ -131,6 +134,13 @@ public class JCRHFDConverter {
         }
 
         /*
+         * Add JCR product library
+         */
+        if (isProductLibrary) {
+            removeProductLibrary(remoteInputWorkFile, preferences.getProductLibrary());
+        }
+
+        /*
          * Read converted data
          */
         String[] convertedSourceLines = download(remoteOutputWorkFile);
@@ -138,41 +148,78 @@ public class JCRHFDConverter {
         return convertedSourceLines;
     }
 
-    private void initializeFileMember(AS400File as400File, String member, String memberType) throws IOException, InterruptedException,
+    private boolean addProductLibrary(AS400File as400File, String library, String position) {
+
+        String command = "ADDLIBLE LIB(" + library + ") POSITION(" + position + ")";
+
+        try {
+            AS400Message[] messages = as400File.runCommand(command);
+            for (AS400Message message : messages) {
+                if ("CPC2196".equals(message.getID())) { // Library added
+                    return true;
+                }
+            }
+            return false;
+        } catch (AS400SecurityException e) {
+            return false;
+        } catch (InterruptedException e) {
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private boolean removeProductLibrary(AS400File as400File, String library) {
+
+        String command = "RMVLIBLE LIB(" + library + ")";
+
+        try {
+            AS400Message[] messages = as400File.runCommand(command);
+            for (AS400Message message : messages) {
+                if ("CPC2197".equals(message.getID())) { // Library added
+                    return true;
+                }
+            }
+            return false;
+        } catch (AS400SecurityException e) {
+            return false;
+        } catch (InterruptedException e) {
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private void initializeFileMember(AS400File as400File, String member, String memberType, String text) throws IOException, InterruptedException,
         AS400SecurityException, CommandFailureException {
 
         // Clear file member
         // Monitor message ID "CPC3101" - Member cleared
-        executeCommand(as400File, getCommandClearFileMember(as400File.getLibraryName(), as400File.getFileName(), member), "CPC3101");
+        executeCommand(as400File, getCommandClearFileMember(getLibraryName(as400File), as400File.getFileName(), member), "CPC3101");
 
         // Change source type of file member
         // Monitor message ID "CPC3201" - Member changed
-        executeCommand(as400File, getCommandChangeSourceType(as400File.getLibraryName(), as400File.getFileName(), member, memberType), "CPC3201");
+        executeCommand(as400File, getCommandChangeSourceMemberTypeAndText(getLibraryName(as400File), as400File.getFileName(), member, memberType,
+            text), "CPC3201");
     }
 
     private void createFile(AS400File as400File) throws IOException, InterruptedException, AS400SecurityException, CommandFailureException {
 
         int workFileRecordLength = Preferences.getInstance().getWorkFileRecordLength();
         // Monitor message ID "CPC7301" - File created
-        executeCommand(as400File, getCommandCrtSrcPf(as400File.getLibraryName(), as400File.getFileName(), workFileRecordLength), "CPC7301");
+        executeCommand(as400File, getCommandCrtSrcPf(getLibraryName(as400File), as400File.getFileName(), workFileRecordLength), "CPC7301");
     }
 
-    private void createFileMember(AS400File as400File, String member, String text) throws Exception {
+    private void createFileMember(AS400File as400File, String member) throws Exception {
 
-        as400File.addPhysicalFileMember(member, text);
-
-        // QSYSObjectPathName pathName = new
-        // QSYSObjectPathName(as400File.getPath());
-        // pathName.setMemberName(member);
-        //
-        // as400File.setPath(pathName.getPath());
+        as400File.addPhysicalFileMember(member, ""); //$NON-NLS-1$
     }
 
     private boolean checkFileMember(AS400File as400File) {
 
         try {
 
-            executeCommand(as400File, getCommandCheckFileMember(as400File.getLibraryName(), as400File.getFileName(), as400File.getMemberName()));
+            executeCommand(as400File, getCommandCheckFileMember(getLibraryName(as400File), as400File.getFileName(), as400File.getMemberName()));
             return true;
 
         } catch (Exception e) {
@@ -184,7 +231,7 @@ public class JCRHFDConverter {
 
         try {
 
-            executeCommand(as400File, getCommandCheckFile(as400File.getLibraryName(), as400File.getFileName()));
+            executeCommand(as400File, getCommandCheckFile(getLibraryName(as400File), as400File.getFileName()));
             return true;
 
         } catch (Exception e) {
@@ -196,7 +243,7 @@ public class JCRHFDConverter {
 
         try {
 
-            executeCommand(as400File, getCommandCheckLibrary(as400File.getLibraryName()));
+            executeCommand(as400File, getCommandCheckLibrary(getLibraryName(as400File)));
             return true;
 
         } catch (Exception e) {
@@ -257,7 +304,7 @@ public class JCRHFDConverter {
         return cmd.toString();
     }
 
-    private String getCommandChangeSourceType(String library, String file, String member, String srcType) {
+    private String getCommandChangeSourceMemberTypeAndText(String library, String file, String member, String srcType, String text) {
 
         StringBuilder cmd = new StringBuilder();
         cmd.append("CHGPFM FILE(");
@@ -268,7 +315,9 @@ public class JCRHFDConverter {
         cmd.append(member);
         cmd.append(") SRCTYPE(");
         cmd.append(srcType);
-        cmd.append(")");
+        cmd.append(") TEXT('");
+        cmd.append(text);
+        cmd.append("')");
 
         return cmd.toString();
     }
@@ -323,16 +372,16 @@ public class JCRHFDConverter {
         return cmd.toString();
     }
 
-    public void upload(AS400File sourceFile, String[] sourceLines) throws Exception {
+    public void upload(AS400File as400File, String[] sourceLines) throws Exception {
 
-        AS400FileRecordDescription recordDescription = new AS400FileRecordDescription(sourceFile.getSystem(), sourceFile.getPath());
+        AS400FileRecordDescription recordDescription = new AS400FileRecordDescription(as400File.getSystem(), as400File.getPath());
 
         try {
 
             RecordFormat[] format = recordDescription.retrieveRecordFormat();
 
-            sourceFile.setRecordFormat(format[0]);
-            sourceFile.open(AS400File.WRITE_ONLY, 0, AS400File.COMMIT_LOCK_LEVEL_NONE);
+            as400File.setRecordFormat(format[0]);
+            as400File.open(AS400File.WRITE_ONLY, 0, AS400File.COMMIT_LOCK_LEVEL_NONE);
 
             BigDecimal srcSeq = new BigDecimal(0);
             BigDecimal srcInc = new BigDecimal(1);
@@ -346,49 +395,57 @@ public class JCRHFDConverter {
                 records[i] = record;
             }
 
-            sourceFile.write(records);
+            as400File.write(records);
 
-            sourceFile.close();
+            as400File.close();
 
         } finally {
             try {
-                sourceFile.close();
+                as400File.close();
             } catch (Exception e) {
                 Logger.logError("*** Could not close file ***", e); //$NON-NLS-1$
             }
         }
     }
 
-    public String[] download(AS400File sourceFile) throws Exception {
+    public String[] download(AS400File as400File) throws Exception {
 
         List<String> sourceLines = new LinkedList<String>();
 
-        AS400FileRecordDescription recordDescription = new AS400FileRecordDescription(sourceFile.getSystem(), sourceFile.getPath());
+        AS400FileRecordDescription recordDescription = new AS400FileRecordDescription(as400File.getSystem(), as400File.getPath());
 
         try {
 
             RecordFormat[] format = recordDescription.retrieveRecordFormat();
 
-            sourceFile.setRecordFormat(format[0]);
-            sourceFile.open(AS400File.READ_ONLY, 1000, AS400File.COMMIT_LOCK_LEVEL_NONE);
+            as400File.setRecordFormat(format[0]);
+            as400File.open(AS400File.READ_ONLY, 1000, AS400File.COMMIT_LOCK_LEVEL_NONE);
 
-            Record record = sourceFile.readNext();
+            Record record = as400File.readNext();
             while (record != null) {
                 String sourceData = (String)record.getField(SRCDTA_INDEX);
                 sourceLines.add(sourceData);
-                record = sourceFile.readNext();
+                record = as400File.readNext();
             }
 
-            sourceFile.close();
+            as400File.close();
 
         } finally {
             try {
-                sourceFile.close();
+                as400File.close();
             } catch (Exception e) {
                 Logger.logError("*** Could not close file ***", e); //$NON-NLS-1$
             }
         }
 
         return sourceLines.toArray(new String[sourceLines.size()]);
+    }
+
+    private String getLibraryName(AS400File as400File) {
+
+        String path = as400File.getPath();
+        QSYSObjectPathName pathName = new QSYSObjectPathName(path);
+
+        return pathName.getLibraryName();
     }
 }
