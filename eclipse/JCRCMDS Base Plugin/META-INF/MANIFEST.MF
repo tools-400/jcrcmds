@@ -13,5 +13,4 @@ Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: com.jcrcmds.base.shared.exceptions,
  com.jcrcmds.base.shared.helper,
- com.jcrcmds.base.shared.host,
  com.jcrcmds.base.shared.logger

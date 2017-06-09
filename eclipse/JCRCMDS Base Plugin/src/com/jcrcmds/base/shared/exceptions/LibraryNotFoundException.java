@@ -6,14 +6,22 @@
  * http://www.eclipse.org/legal/cpl-v10.html
  *******************************************************************************/
 
-package com.jcrcmds.core.host;
+package com.jcrcmds.base.shared.exceptions;
 
-import com.jcrcmds.base.rse.shared.host.AbstractRemoteLibrary;
+import com.jcrcmds.base.Messages;
 
-public class RemoteLibrary extends AbstractRemoteLibrary {
+public class LibraryNotFoundException extends Exception {
 
-    public RemoteLibrary(String connectionName, String library) {
-        super(connectionName, library);
+    private static final long serialVersionUID = -8540311098881297311L;
+
+    private String library;
+
+    public LibraryNotFoundException(String library) {
+        this.library = library;
     }
 
+    @Override
+    public String getMessage() {
+        return Messages.bind(Messages.LibraryNotFoundException, library);
+    }
 }

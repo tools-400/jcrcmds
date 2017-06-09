@@ -22,6 +22,7 @@ public final class Logger {
      * @param e The exception that has produced the error
      */
     public static void logError(String message, Throwable e) {
+
         if (getPlugin() == null) {
             System.err.println(message);
             e.printStackTrace();

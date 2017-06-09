@@ -18,6 +18,7 @@ public class Messages extends NLS {
 
     public static String UnexpectedErrorException;
     public static String CommandFailureException;
+    public static String LibraryNotFoundException;
 
     public static String No_further_information_available_Check_the_Eclipse_error_log_for_details;
 

@@ -24,7 +24,6 @@ public class CommandFailureException extends Exception {
 
     @Override
     public String getMessage() {
-        // Messages.bind(Messages.Could_not_execute_command_A_Reason_B)
         return Messages.bind(Messages.CommandFailureException, command, message);
     }
 }
