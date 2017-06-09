@@ -29,6 +29,9 @@ import com.jcrcmds.core.swt.widgets.WidgetFactory;
 
 public class JcrCmds extends PreferencePage implements IWorkbenchPreferencePage {
 
+    private static final int MAXIMUM_NAME_LENGTH = 9;
+    private static final int MAXIMUM_RECORD_LENGTH = 32766;
+
     private Text textProductLibrary;
     private Text textWorkLibrary;
     private Text textWorkFile;
@@ -102,9 +105,10 @@ public class JcrCmds extends PreferencePage implements IWorkbenchPreferencePage 
         });
 
         textWorkFileRecordLength = createIntegerField(parent, Messages.Label_work_file_record_length, Messages.Tooltip_work_file_record_length);
+        textWorkFileRecordLength.setTextLimit(5);
         textWorkFileRecordLength.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
-                if (validateProductLibraryName()) {
+                if (validateWorkFileRecordLength()) {
                     validateAll();
                 }
                 setControlsEnablement();
@@ -185,6 +189,11 @@ public class JcrCmds extends PreferencePage implements IWorkbenchPreferencePage 
 
     @Override
     public boolean performOk() {
+
+        if (!validateAll()) {
+            return false;
+        }
+
         setStoreToValues();
         return super.performOk();
     }
@@ -250,6 +259,30 @@ public class JcrCmds extends PreferencePage implements IWorkbenchPreferencePage 
 
     private boolean validateWorkMemberName() {
 
+        if (textWorkMember.getText().length() > MAXIMUM_NAME_LENGTH) {
+            setErrorMessage(Messages.bind(Messages.Name_must_not_exceed_A_characters_because_suffixes_are_added, MAXIMUM_NAME_LENGTH));
+            textWorkMember.setFocus();
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean validateWorkFileRecordLength() {
+
+        int recordLength = IntHelper.tryParseInt(textWorkFileRecordLength.getText(), -1);
+        if (recordLength < 0) {
+            setErrorMessage(Messages.Invalid_numeric_data);
+            textWorkFileRecordLength.setFocus();
+            return false;
+        }
+
+        if (recordLength > MAXIMUM_RECORD_LENGTH) {
+            setErrorMessage(Messages.bind(Messages.Value_must_not_exceed_A, MAXIMUM_RECORD_LENGTH));
+            textWorkFileRecordLength.setFocus();
+            return false;
+        }
+
         return true;
     }
 
@@ -261,6 +294,26 @@ public class JcrCmds extends PreferencePage implements IWorkbenchPreferencePage 
     private boolean validateAll() {
 
         if (!validateProductLibraryName()) {
+            return false;
+        }
+
+        if (!validateWorkLibraryName()) {
+            return false;
+        }
+
+        if (!validateWorkFileName()) {
+            return false;
+        }
+
+        if (!validateWorkMemberName()) {
+            return false;
+        }
+
+        if (!validateWorkFileRecordLength()) {
+            return false;
+        }
+
+        if (!validateJCRHFDCommand()) {
             return false;
         }
 

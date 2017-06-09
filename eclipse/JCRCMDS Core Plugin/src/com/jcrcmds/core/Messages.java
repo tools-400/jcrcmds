@@ -27,6 +27,10 @@ public class Messages extends NLS {
     public static String Could_not_create_source_member_C_in_file_B_in_library_A_Reason_D;
     public static String Could_not_clear_source_member_C_in_file_B_in_library_A_Reason_D;
 
+    public static String Name_must_not_exceed_A_characters_because_suffixes_are_added;
+    public static String Invalid_numeric_data;
+    public static String Value_must_not_exceed_A;
+
     // Information messages
     public static String Information;
     public static String No_source_lines_selected;
