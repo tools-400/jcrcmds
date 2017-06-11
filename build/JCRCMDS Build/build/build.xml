@@ -312,7 +312,7 @@
     *   where bug NET-512 has been fixed.
     *   (https://issues.apache.org/jira/browse/NET-512)
     * ===================================================================== -->
-	<target name="downloadIBMiLibrary" depends="ftpCredentialsIBMi" description="Download library from IBM i">
+	<target name="downloadIBMiLibrary_not_yet_used" depends="ftpCredentialsIBMi" description="Download library from IBM i">
 
 		<echo>Downloading save file ${IBMi.ftp.savefile.name} ...</echo>
 
