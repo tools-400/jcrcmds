@@ -19,15 +19,18 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
 
 import com.ibm.as400.access.AS400;
+import com.ibm.as400.access.AS400Exception;
 import com.ibm.as400.access.AS400File;
 import com.ibm.as400.access.AS400FileRecordDescription;
 import com.ibm.as400.access.AS400Message;
 import com.ibm.as400.access.AS400SecurityException;
+import com.ibm.as400.access.FieldDescription;
 import com.ibm.as400.access.QSYSObjectPathName;
 import com.ibm.as400.access.Record;
 import com.ibm.as400.access.RecordFormat;
 import com.ibm.as400.access.SequentialFile;
 import com.jcrcmds.base.shared.exceptions.CommandFailureException;
+import com.jcrcmds.base.shared.exceptions.DataTruncationException;
 import com.jcrcmds.base.shared.exceptions.LibraryNotFoundException;
 import com.jcrcmds.base.shared.helper.ExceptionHelper;
 import com.jcrcmds.base.shared.logger.Logger;
@@ -49,13 +52,14 @@ public class JCRHFDConverter {
         this.system = system;
     }
 
-    public void convertAsync(final String[] sourceLines, final String memberType, final IResultReceiver receiver) throws Exception {
+    public void convertAsync(final String[] sourceLines, final String memberType, final int recordLength, final IResultReceiver receiver)
+        throws Exception {
 
         IProgressService service = PlatformUI.getWorkbench().getProgressService();
         service.busyCursorWhile(new IRunnableWithProgress() {
             public void run(IProgressMonitor arg0) {
                 try {
-                    String[] result = convert(sourceLines, memberType);
+                    String[] result = convert(sourceLines, memberType, recordLength);
                     receiver.setResult(result);
                 } catch (Exception e) {
                     MessageDialogAsync.displayError(ExceptionHelper.getLocalizedMessage(e));
@@ -64,7 +68,7 @@ public class JCRHFDConverter {
         });
     }
 
-    private String[] convert(String[] sourceLines, String memberType) throws Exception {
+    private String[] convert(String[] sourceLines, String memberType, int requiredRecordLength) throws Exception {
 
         Preferences preferences = Preferences.getInstance();
         String workLibrary = preferences.getWorkLibrary();
@@ -73,6 +77,11 @@ public class JCRHFDConverter {
         String workMember1 = preferences.getWorkMember() + "1"; //$NON-NLS-1$
         String workMember2 = preferences.getWorkMember() + "2"; //$NON-NLS-1$
 
+        int defaultRecordLength = Preferences.getInstance().getWorkFileRecordLength();
+        if (requiredRecordLength < defaultRecordLength) {
+            requiredRecordLength = defaultRecordLength;
+        }
+
         SequentialFile remoteInputWorkFile = new SequentialFile(system, new QSYSObjectPathName(workLibrary, workFile, workMember1, "MBR").getPath());
 
         if (!checkLibrary(remoteInputWorkFile)) {
@@ -80,7 +89,9 @@ public class JCRHFDConverter {
         }
 
         if (!checkFile(remoteInputWorkFile)) {
-            createFile(remoteInputWorkFile);
+            createFile(remoteInputWorkFile, requiredRecordLength);
+        } else {
+            checkRecordLength(remoteInputWorkFile, requiredRecordLength);
         }
 
         if (!checkFileMember(remoteInputWorkFile)) {
@@ -96,7 +107,9 @@ public class JCRHFDConverter {
         }
 
         if (!checkFile(remoteOutputWorkFile)) {
-            createFile(remoteOutputWorkFile);
+            createFile(remoteOutputWorkFile, requiredRecordLength);
+        } else {
+            checkRecordLength(remoteOutputWorkFile, requiredRecordLength);
         }
 
         if (!checkFileMember(remoteOutputWorkFile)) {
@@ -129,15 +142,14 @@ public class JCRHFDConverter {
             jcrHfdCommand = jcrHfdCommand.replaceAll("&OM", workMember2); //$NON-NLS-1$
             executeCommand(remoteInputWorkFile, jcrHfdCommand);
 
-        } catch (Exception e) {
-            MessageDialogAsync.displayError(ExceptionHelper.getLocalizedMessage(e));
-        }
+        } finally {
 
-        /*
-         * Add JCR product library
-         */
-        if (isProductLibrary) {
-            removeProductLibrary(remoteInputWorkFile, preferences.getProductLibrary());
+            /*
+             * Remove JCR product library
+             */
+            if (isProductLibrary) {
+                removeProductLibrary(remoteInputWorkFile, preferences.getProductLibrary());
+            }
         }
 
         /*
@@ -199,20 +211,29 @@ public class JCRHFDConverter {
 
         // Change source type of file member
         // Monitor message ID "CPC3201" - Member changed
-        executeCommand(as400File, getCommandChangeSourceMemberTypeAndText(getLibraryName(as400File), as400File.getFileName(), member, memberType,
-            text), "CPC3201");
+        executeCommand(as400File,
+            getCommandChangeSourceMemberTypeAndText(getLibraryName(as400File), as400File.getFileName(), member, memberType, text), "CPC3201");
     }
 
-    private void createFile(AS400File as400File) throws IOException, InterruptedException, AS400SecurityException, CommandFailureException {
+    private void createFile(AS400File as400File, int recordLength) throws IOException, InterruptedException, AS400SecurityException,
+        CommandFailureException {
 
-        int workFileRecordLength = Preferences.getInstance().getWorkFileRecordLength();
         // Monitor message ID "CPC7301" - File created
-        executeCommand(as400File, getCommandCrtSrcPf(getLibraryName(as400File), as400File.getFileName(), workFileRecordLength), "CPC7301");
+        executeCommand(as400File, getCommandCrtSrcPf(getLibraryName(as400File), as400File.getFileName(), recordLength), "CPC7301");
     }
 
     private void createFileMember(AS400File as400File, String member) throws Exception {
 
         as400File.addPhysicalFileMember(member, ""); //$NON-NLS-1$
+    }
+
+    private void checkRecordLength(AS400File as400File, int requiredRecordLength) throws AS400Exception, AS400SecurityException,
+        InterruptedException, IOException, DataTruncationException {
+
+        int actualRecordLength = getRecordLength(as400File);
+        if (actualRecordLength < requiredRecordLength) {
+            throw new DataTruncationException(getLibraryName(as400File), as400File.getFileName(), actualRecordLength, requiredRecordLength);
+        }
     }
 
     private boolean checkFileMember(AS400File as400File) {
@@ -372,7 +393,20 @@ public class JCRHFDConverter {
         return cmd.toString();
     }
 
-    public void upload(AS400File as400File, String[] sourceLines) throws Exception {
+    private int getRecordLength(AS400File as400File) throws AS400Exception, AS400SecurityException, InterruptedException, IOException {
+
+        AS400FileRecordDescription recordDescription = new AS400FileRecordDescription(as400File.getSystem(), as400File.getPath());
+        RecordFormat[] format = recordDescription.retrieveRecordFormat();
+        int recordFormatLength = 0;
+        for (int i = 0; i < format[0].getNumberOfFields(); i++) {
+            FieldDescription fieldDescription = format[0].getFieldDescription(i);
+            recordFormatLength = recordFormatLength + fieldDescription.getLength();
+        }
+
+        return recordFormatLength;
+    }
+
+    private void upload(AS400File as400File, String[] sourceLines) throws Exception {
 
         AS400FileRecordDescription recordDescription = new AS400FileRecordDescription(as400File.getSystem(), as400File.getPath());
 
@@ -408,7 +442,7 @@ public class JCRHFDConverter {
         }
     }
 
-    public String[] download(AS400File as400File) throws Exception {
+    private String[] download(AS400File as400File) throws Exception {
 
         List<String> sourceLines = new LinkedList<String>();
 

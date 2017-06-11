@@ -57,8 +57,10 @@ public class ConvertSelectionHFDAction extends AbstractLpexAction implements IRe
                 return;
             }
 
+            int recordLength = view.queryInt("current.save.textLimit");
+
             JCRHFDConverter converter = new JCRHFDConverter(system);
-            converter.convertAsync(sourceLines, getMemberType(editor), this);
+            converter.convertAsync(sourceLines, getMemberType(editor), recordLength, this);
 
         } catch (Throwable e) {
             Logger.logError("*** Unexpected error when attempting to convert selected source line (HFD) ***", e); //$NON-NLS-1$
