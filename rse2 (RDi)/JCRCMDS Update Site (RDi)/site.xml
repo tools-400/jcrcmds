@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.jcrcmds.core_1.0.0.r.jar" id="com.jcrcmds.core" version="1.0.0.r">
+   <feature url="features/com.jcrcmds.core_1.0.1.r.jar" id="com.jcrcmds.core" version="1.0.1.r">
       <category name="com.jcrcmds"/>
    </feature>
    <category-def name="com.jcrcmds" label="JCRCMDS for RDi 8.0+">
