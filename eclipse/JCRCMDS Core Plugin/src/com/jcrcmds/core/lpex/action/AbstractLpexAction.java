@@ -13,7 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -25,6 +24,7 @@ import com.ibm.lpex.core.LpexDocumentLocation;
 import com.ibm.lpex.core.LpexView;
 import com.jcrcmds.base.rse.shared.connection.ConnectionHelper;
 import com.jcrcmds.core.Messages;
+import com.jcrcmds.core.runtime.monitor.JCRSubMonitor;
 
 public abstract class AbstractLpexAction implements LpexAction {
 
@@ -83,7 +83,7 @@ public abstract class AbstractLpexAction implements LpexAction {
 
     private void replaceRange(String[] sourceLines, int firstLine, int lastLine, IProgressMonitor monitor) {
 
-        SubMonitor subMonitor = SubMonitor.convert(monitor, sourceLines.length);
+        JCRSubMonitor subMonitor = JCRSubMonitor.convert(monitor, sourceLines.length);
         subMonitor.setTaskName(Messages.Monitor_Replacing_source_lines);
 
         long lastUpdateTime = Calendar.getInstance().getTimeInMillis();
@@ -125,11 +125,9 @@ public abstract class AbstractLpexAction implements LpexAction {
         }
 
         updateProgressMonitor(subMonitor, numberOfLinesReplaced, totalNumberOfLinesReplaced, totalNumberOfLinesToReplace);
-
-        subMonitor.newChild(0);
     }
 
-    private long updateProgressMonitor(SubMonitor subMonitor, int numberOfLinesReplaced, int totalNumberOfLinesReplaced,
+    private long updateProgressMonitor(JCRSubMonitor subMonitor, int numberOfLinesReplaced, int totalNumberOfLinesReplaced,
         int totalNumberOfLinesToReplace) {
 
         subMonitor.newChild(numberOfLinesReplaced);

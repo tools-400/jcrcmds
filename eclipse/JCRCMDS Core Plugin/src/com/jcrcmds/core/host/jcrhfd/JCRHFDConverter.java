@@ -37,6 +37,7 @@ import com.jcrcmds.base.shared.helper.ExceptionHelper;
 import com.jcrcmds.base.shared.logger.Logger;
 import com.jcrcmds.core.Messages;
 import com.jcrcmds.core.preferences.Preferences;
+import com.jcrcmds.core.runtime.monitor.JCRSubMonitor;
 import com.jcrcmds.core.ui.MessageDialogAsync;
 
 public class JCRHFDConverter {
@@ -61,9 +62,10 @@ public class JCRHFDConverter {
         service.busyCursorWhile(new IRunnableWithProgress() {
             public void run(IProgressMonitor monitor) {
                 try {
-                    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+                    JCRSubMonitor subMonitor = JCRSubMonitor.convert(monitor, 100);
                     String[] result = convert(sourceLines, memberType, recordLength, subMonitor.newChild(75));
                     receiver.setResult(result, subMonitor.newChild(25));
+                    subMonitor.newChild(0);
                 } catch (Exception e) {
                     MessageDialogAsync.displayError(ExceptionHelper.getLocalizedMessage(e));
                 }
