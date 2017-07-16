@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
@@ -34,6 +35,7 @@ import com.jcrcmds.base.shared.exceptions.DataTruncationException;
 import com.jcrcmds.base.shared.exceptions.LibraryNotFoundException;
 import com.jcrcmds.base.shared.helper.ExceptionHelper;
 import com.jcrcmds.base.shared.logger.Logger;
+import com.jcrcmds.core.Messages;
 import com.jcrcmds.core.preferences.Preferences;
 import com.jcrcmds.core.ui.MessageDialogAsync;
 
@@ -57,10 +59,11 @@ public class JCRHFDConverter {
 
         IProgressService service = PlatformUI.getWorkbench().getProgressService();
         service.busyCursorWhile(new IRunnableWithProgress() {
-            public void run(IProgressMonitor arg0) {
+            public void run(IProgressMonitor monitor) {
                 try {
-                    String[] result = convert(sourceLines, memberType, recordLength);
-                    receiver.setResult(result);
+                    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+                    String[] result = convert(sourceLines, memberType, recordLength, subMonitor.newChild(75));
+                    receiver.setResult(result, subMonitor.newChild(25));
                 } catch (Exception e) {
                     MessageDialogAsync.displayError(ExceptionHelper.getLocalizedMessage(e));
                 }
@@ -68,7 +71,9 @@ public class JCRHFDConverter {
         });
     }
 
-    private String[] convert(String[] sourceLines, String memberType, int requiredRecordLength) throws Exception {
+    private String[] convert(String[] sourceLines, String memberType, int requiredRecordLength, IProgressMonitor monitor) throws Exception {
+
+        SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
         Preferences preferences = Preferences.getInstance();
         String workLibrary = preferences.getWorkLibrary();
@@ -81,6 +86,10 @@ public class JCRHFDConverter {
         if (requiredRecordLength < defaultRecordLength) {
             requiredRecordLength = defaultRecordLength;
         }
+
+        // Check preconditions
+        subMonitor.newChild(25);
+        subMonitor.setTaskName(Messages.Monitor_Checking_preconditions);
 
         SequentialFile remoteInputWorkFile = new SequentialFile(system, new QSYSObjectPathName(workLibrary, workFile, workMember1, "MBR").getPath());
 
@@ -121,6 +130,8 @@ public class JCRHFDConverter {
         /*
          * Upload selected source lines
          */
+        subMonitor.newChild(25);
+        subMonitor.setTaskName(Messages.Monitor_Uploading_source_lines_to_host);
         upload(remoteInputWorkFile, sourceLines);
 
         /*
@@ -133,6 +144,8 @@ public class JCRHFDConverter {
          */
         try {
 
+            subMonitor.newChild(25);
+            subMonitor.setTaskName(Messages.Monitor_Converting_source_lines);
             String jcrHfdCommand = preferences.getProductLibrary() + "/" + preferences.getJcrHfdCommand(); //$NON-NLS-1$
             jcrHfdCommand = jcrHfdCommand.replaceAll("&IL", workLibrary); //$NON-NLS-1$
             jcrHfdCommand = jcrHfdCommand.replaceAll("&IF", workFile); //$NON-NLS-1$
@@ -155,8 +168,11 @@ public class JCRHFDConverter {
         /*
          * Read converted data
          */
+        subMonitor.newChild(25);
+        subMonitor.setTaskName(Messages.Monitor_Downloading_source_lines_from_host);
         String[] convertedSourceLines = download(remoteOutputWorkFile);
 
+        subMonitor.newChild(0);
         return convertedSourceLines;
     }
 

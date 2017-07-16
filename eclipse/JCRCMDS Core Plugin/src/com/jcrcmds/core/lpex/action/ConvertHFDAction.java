@@ -8,6 +8,7 @@
 
 package com.jcrcmds.core.lpex.action;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -66,9 +67,9 @@ public class ConvertHFDAction extends AbstractLpexAction implements IResultRecei
         }
     }
 
-    public void setResult(String[] sourceLines) {
+    public void setResult(String[] sourceLines, IProgressMonitor monitor) {
         if (sourceLines != null) {
-            setContent(sourceLines);
+            setContent(sourceLines, monitor);
         }
     }
 

@@ -8,6 +8,7 @@
 
 package com.jcrcmds.core.lpex.action;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -68,9 +69,9 @@ public class ConvertSelectionHFDAction extends AbstractLpexAction implements IRe
         }
     }
 
-    public void setResult(String[] sourceLines) {
+    public void setResult(String[] sourceLines, IProgressMonitor monitor) {
         if (sourceLines != null) {
-            replaceSelectedSourceLines(sourceLines);
+            replaceSelectedSourceLines(sourceLines, monitor);
         }
     }
 

@@ -8,8 +8,10 @@
 
 package com.jcrcmds.core.host.jcrhfd;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 public interface IResultReceiver {
 
-    public void setResult(String[] sourceLines);
+    public void setResult(String[] sourceLines, IProgressMonitor monitor);
 
 }

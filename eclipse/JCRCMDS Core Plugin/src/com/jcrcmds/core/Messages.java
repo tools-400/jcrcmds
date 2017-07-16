@@ -53,6 +53,14 @@ public class Messages extends NLS {
     public static String Label_JCRHFD_command;
     public static String Tooltip_JCRHFD_command;
 
+    // Progress monitor messages
+    public static String Monitor_Checking_preconditions;
+    public static String Monitor_Uploading_source_lines_to_host;
+    public static String Monitor_Converting_source_lines;
+    public static String Monitor_Downloading_source_lines_from_host;
+    public static String Monitor_Replacing_source_lines;
+    public static String Monitor_Replacing_source_lines_A_of_B;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

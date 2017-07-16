@@ -8,9 +8,12 @@
 
 package com.jcrcmds.core.lpex.action;
 
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -21,6 +24,7 @@ import com.ibm.lpex.core.LpexAction;
 import com.ibm.lpex.core.LpexDocumentLocation;
 import com.ibm.lpex.core.LpexView;
 import com.jcrcmds.base.rse.shared.connection.ConnectionHelper;
+import com.jcrcmds.core.Messages;
 
 public abstract class AbstractLpexAction implements LpexAction {
 
@@ -47,8 +51,8 @@ public abstract class AbstractLpexAction implements LpexAction {
         return sourceLines.toArray(new String[sourceLines.size()]);
     }
 
-    public void setContent(String[] sourceLines) {
-        replaceRange(sourceLines, 1, view.elements());
+    public void setContent(String[] sourceLines, IProgressMonitor monitor) {
+        replaceRange(sourceLines, 1, view.elements(), monitor);
     }
 
     public int getCount() {
@@ -73,22 +77,33 @@ public abstract class AbstractLpexAction implements LpexAction {
         return sourceLines.toArray(new String[sourceLines.size()]);
     }
 
-    public void replaceSelectedSourceLines(String[] sourceLines) {
-        replaceRange(sourceLines, getFirstSelected(), getLastSelected());
+    public void replaceSelectedSourceLines(String[] sourceLines, IProgressMonitor monitor) {
+        replaceRange(sourceLines, getFirstSelected(), getLastSelected(), monitor);
     }
 
-    private void replaceRange(String[] sourceLines, int firstLine, int lastLine) {
+    private void replaceRange(String[] sourceLines, int firstLine, int lastLine, IProgressMonitor monitor) {
 
-        int i = 0;
+        SubMonitor subMonitor = SubMonitor.convert(monitor, sourceLines.length);
+        subMonitor.setTaskName(Messages.Monitor_Replacing_source_lines);
+
+        long lastUpdateTime = Calendar.getInstance().getTimeInMillis();
+        int numberOfLinesReplaced = 0;
+        int totalNumberOfLinesReplaced = 0;
+        int totalNumberOfLinesToReplace = sourceLines.length;
 
         int lineNbr = firstLine;
 
         // Replace source lines
-        while (lineNbr <= lastLine && i < sourceLines.length) {
+        while (lineNbr <= lastLine && totalNumberOfLinesReplaced < totalNumberOfLinesToReplace) {
             // view.doCommand("locate element " + lineNbr);
-            view.doCommand(new LpexDocumentLocation(lineNbr, 0), "replaceText " + sourceLines[i]); //$NON-NLS-1$
+            view.doCommand(new LpexDocumentLocation(lineNbr, 0), "replaceText " + sourceLines[totalNumberOfLinesReplaced]); //$NON-NLS-1$
             lineNbr++;
-            i++;
+            totalNumberOfLinesReplaced++;
+            numberOfLinesReplaced++;
+            if (mustUpdateMonitor(lastUpdateTime, numberOfLinesReplaced)) {
+                lastUpdateTime = updateProgressMonitor(subMonitor, numberOfLinesReplaced, totalNumberOfLinesReplaced, totalNumberOfLinesToReplace);
+                numberOfLinesReplaced = 0;
+            }
         }
 
         // Remove additional source lines
@@ -98,11 +113,39 @@ public abstract class AbstractLpexAction implements LpexAction {
 
         // Insert additional source lines
         lineNbr--;
-        while (i < sourceLines.length) {
-            view.doCommand(new LpexDocumentLocation(lineNbr, 0), "insert " + sourceLines[i]); //$NON-NLS-1$
+        while (totalNumberOfLinesReplaced < totalNumberOfLinesToReplace) {
+            view.doCommand(new LpexDocumentLocation(lineNbr, 0), "insert " + sourceLines[totalNumberOfLinesReplaced]); //$NON-NLS-1$
             lineNbr++;
-            i++;
+            totalNumberOfLinesReplaced++;
+            numberOfLinesReplaced++;
+            if (mustUpdateMonitor(lastUpdateTime, numberOfLinesReplaced)) {
+                lastUpdateTime = updateProgressMonitor(subMonitor, numberOfLinesReplaced, totalNumberOfLinesReplaced, totalNumberOfLinesToReplace);
+                numberOfLinesReplaced = 0;
+            }
         }
+
+        updateProgressMonitor(subMonitor, numberOfLinesReplaced, totalNumberOfLinesReplaced, totalNumberOfLinesToReplace);
+
+        subMonitor.newChild(0);
+    }
+
+    private long updateProgressMonitor(SubMonitor subMonitor, int numberOfLinesReplaced, int totalNumberOfLinesReplaced,
+        int totalNumberOfLinesToReplace) {
+
+        subMonitor.newChild(numberOfLinesReplaced);
+        subMonitor.setTaskName(Messages.bind(Messages.Monitor_Replacing_source_lines_A_of_B, Integer.valueOf(totalNumberOfLinesReplaced),
+            Integer.valueOf(totalNumberOfLinesToReplace)));
+
+        return Calendar.getInstance().getTimeInMillis();
+    }
+
+    private boolean mustUpdateMonitor(long lastUpdateTime, int numberOfLinesReplaced) {
+
+        if (Calendar.getInstance().getTimeInMillis() - lastUpdateTime >= 3000 || numberOfLinesReplaced >= 100) {
+            return true;
+        }
+
+        return false;
     }
 
     public int getCountSelected() {
