@@ -14,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
@@ -75,7 +74,7 @@ public class JCRHFDConverter {
 
     private String[] convert(String[] sourceLines, String memberType, int requiredRecordLength, IProgressMonitor monitor) throws Exception {
 
-        SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+        JCRSubMonitor subMonitor = JCRSubMonitor.convert(monitor, 100);
 
         Preferences preferences = Preferences.getInstance();
         String workLibrary = preferences.getWorkLibrary();
@@ -229,8 +228,8 @@ public class JCRHFDConverter {
 
         // Change source type of file member
         // Monitor message ID "CPC3201" - Member changed
-        executeCommand(as400File,
-            getCommandChangeSourceMemberTypeAndText(getLibraryName(as400File), as400File.getFileName(), member, memberType, text), "CPC3201");
+        executeCommand(as400File, getCommandChangeSourceMemberTypeAndText(getLibraryName(as400File), as400File.getFileName(), member, memberType,
+            text), "CPC3201");
     }
 
     private void createFile(AS400File as400File, int recordLength) throws IOException, InterruptedException, AS400SecurityException,
