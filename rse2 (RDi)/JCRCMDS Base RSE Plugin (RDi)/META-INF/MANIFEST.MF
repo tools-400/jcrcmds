@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JCRCMDS Base RSE Plugin (required)
 Bundle-SymbolicName: com.jcrcmds.base.rse
-Bundle-Version: 1.0.1.r
+Bundle-Version: 1.0.2.r
 Bundle-Activator: com.jcrcmds.base.rse.JcrCmdsBaseRSEPlugin
 Bundle-Vendor: JCRCMDS Project Team
 Require-Bundle: org.eclipse.ui,
