@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JCRCMDS Base Plug-in (required)
 Bundle-SymbolicName: com.jcrcmds.base
-Bundle-Version: 1.0.2.r
+Bundle-Version: 1.0.3.r
 Bundle-Activator: com.jcrcmds.base.JcrCmdsBasePlugin
 Bundle-Vendor: JCRCMDS Project Team
 Require-Bundle: org.eclipse.ui,
