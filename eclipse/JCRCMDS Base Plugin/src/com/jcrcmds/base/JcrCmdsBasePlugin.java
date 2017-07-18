@@ -30,6 +30,8 @@ public class JcrCmdsBasePlugin extends AbstractUIPlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
+        
+        logInfo("Plug-in started.");
     }
 
     /*
@@ -80,7 +82,7 @@ public class JcrCmdsBasePlugin extends AbstractUIPlugin {
             System.err.println(message);
             return;
         }
-        plugin.getLog().log(new Status(Status.INFO, PLUGIN_ID, message));
+        plugin.getLog().log(new Status(Status.INFO, PLUGIN_ID, Status.INFO, message, null));
     }
 
 }
