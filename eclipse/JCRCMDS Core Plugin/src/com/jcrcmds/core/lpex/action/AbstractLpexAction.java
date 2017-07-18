@@ -83,8 +83,14 @@ public abstract class AbstractLpexAction implements LpexAction {
 
     private void replaceRange(String[] sourceLines, int firstLine, int lastLine, IProgressMonitor monitor) {
 
-        JCRSubMonitor subMonitor = JCRSubMonitor.convert(monitor, sourceLines.length);
-        subMonitor.setTaskName(Messages.Monitor_Replacing_source_lines);
+        int currentElement = view.currentElement();
+        int currentPosition = view.currentPosition();
+
+        JCRSubMonitor subMonitor = null;
+        if (monitor != null) {
+            subMonitor = JCRSubMonitor.convert(monitor, sourceLines.length);
+            subMonitor.setTaskName(Messages.Monitor_Replacing_source_lines);
+        }
 
         long lastUpdateTime = Calendar.getInstance().getTimeInMillis();
         int numberOfLinesReplaced = 0;
@@ -125,21 +131,32 @@ public abstract class AbstractLpexAction implements LpexAction {
         }
 
         updateProgressMonitor(subMonitor, numberOfLinesReplaced, totalNumberOfLinesReplaced, totalNumberOfLinesToReplace);
+
+        if (currentElement <= view.elements()) {
+            view.doCommand("locate element " + currentElement); //$NON-NLS-1$
+        } else {
+            view.doCommand("locate element " + view.elements()); //$NON-NLS-1$
+        }
+        view.doCommand("set position " + currentPosition); //$NON-NLS-1$
+
+        view.doCommand("screenShow"); //$NON-NLS-1$
     }
 
     private long updateProgressMonitor(JCRSubMonitor subMonitor, int numberOfLinesReplaced, int totalNumberOfLinesReplaced,
         int totalNumberOfLinesToReplace) {
 
-        subMonitor.newChild(numberOfLinesReplaced);
-        subMonitor.setTaskName(Messages.bind(Messages.Monitor_Replacing_source_lines_A_of_B, Integer.valueOf(totalNumberOfLinesReplaced),
-            Integer.valueOf(totalNumberOfLinesToReplace)));
+        if (subMonitor != null) {
+            subMonitor.newChild(numberOfLinesReplaced);
+            subMonitor.setTaskName(Messages.bind(Messages.Monitor_Replacing_source_lines_A_of_B, Integer.valueOf(totalNumberOfLinesReplaced),
+                Integer.valueOf(totalNumberOfLinesToReplace)));
+        }
 
         return Calendar.getInstance().getTimeInMillis();
     }
 
     private boolean mustUpdateMonitor(long lastUpdateTime, int numberOfLinesReplaced) {
 
-        if (Calendar.getInstance().getTimeInMillis() - lastUpdateTime >= 3000 || numberOfLinesReplaced >= 100) {
+        if (Calendar.getInstance().getTimeInMillis() - lastUpdateTime >= 3000 || numberOfLinesReplaced >= 3) {
             return true;
         }
 

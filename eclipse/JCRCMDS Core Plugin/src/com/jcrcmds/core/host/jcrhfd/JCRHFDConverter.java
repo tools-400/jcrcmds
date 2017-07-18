@@ -9,14 +9,20 @@
 package com.jcrcmds.core.host.jcrhfd;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
+import org.eclipse.ui.progress.UIJob;
 
 import com.ibm.as400.access.AS400;
 import com.ibm.as400.access.AS400Exception;
@@ -37,7 +43,6 @@ import com.jcrcmds.base.shared.logger.Logger;
 import com.jcrcmds.core.Messages;
 import com.jcrcmds.core.preferences.Preferences;
 import com.jcrcmds.core.runtime.monitor.JCRSubMonitor;
-import com.jcrcmds.core.ui.MessageDialogAsync;
 
 public class JCRHFDConverter {
 
@@ -57,19 +62,38 @@ public class JCRHFDConverter {
     public void convertAsync(final String[] sourceLines, final String memberType, final int recordLength, final IResultReceiver receiver)
         throws Exception {
 
-        IProgressService service = PlatformUI.getWorkbench().getProgressService();
-        service.busyCursorWhile(new IRunnableWithProgress() {
-            public void run(IProgressMonitor monitor) {
-                try {
-                    JCRSubMonitor subMonitor = JCRSubMonitor.convert(monitor, 100);
-                    String[] result = convert(sourceLines, memberType, recordLength, subMonitor.newChild(75));
-                    receiver.setResult(result, subMonitor.newChild(25));
-                    subMonitor.newChild(0);
-                } catch (Exception e) {
-                    MessageDialogAsync.displayError(ExceptionHelper.getLocalizedMessage(e));
-                }
+        IRunnableWithProgress job = new IRunnableWithProgress() {
+
+            public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+                doConvert(monitor);
             }
-        });
+
+            private IStatus doConvert(IProgressMonitor monitor) {
+
+                try {
+                    final JCRSubMonitor subMonitor = JCRSubMonitor.convert(monitor, 100);
+                    final String[] result = convert(sourceLines, memberType, recordLength, subMonitor);
+                    UIJob job = new UIJob(Messages.Monitor_Replacing_source_lines) {
+
+                        @Override
+                        public IStatus runInUIThread(IProgressMonitor monitor2) {
+                            JCRSubMonitor subMonitor = JCRSubMonitor.convert(monitor2, 100);
+                            receiver.setResult(result, subMonitor);
+                            subMonitor.newChild(0);
+                            return Status.OK_STATUS;
+                        }
+                    };
+                    job.schedule();
+                } catch (Exception e) {
+                    MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.E_R_R_O_R, ExceptionHelper.getLocalizedMessage(e));
+                }
+
+                return Status.OK_STATUS;
+            }
+        };
+
+        IProgressService service = PlatformUI.getWorkbench().getProgressService();
+        service.busyCursorWhile(job);
     }
 
     private String[] convert(String[] sourceLines, String memberType, int requiredRecordLength, IProgressMonitor monitor) throws Exception {
@@ -228,8 +252,8 @@ public class JCRHFDConverter {
 
         // Change source type of file member
         // Monitor message ID "CPC3201" - Member changed
-        executeCommand(as400File, getCommandChangeSourceMemberTypeAndText(getLibraryName(as400File), as400File.getFileName(), member, memberType,
-            text), "CPC3201");
+        executeCommand(as400File,
+            getCommandChangeSourceMemberTypeAndText(getLibraryName(as400File), as400File.getFileName(), member, memberType, text), "CPC3201");
     }
 
     private void createFile(AS400File as400File, int recordLength) throws IOException, InterruptedException, AS400SecurityException,
