@@ -17,9 +17,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.progress.UIJob;
@@ -43,6 +41,7 @@ import com.jcrcmds.base.shared.logger.Logger;
 import com.jcrcmds.core.Messages;
 import com.jcrcmds.core.preferences.Preferences;
 import com.jcrcmds.core.runtime.monitor.JCRSubMonitor;
+import com.jcrcmds.core.ui.MessageDialogAsync;
 
 public class JCRHFDConverter {
 
@@ -85,7 +84,7 @@ public class JCRHFDConverter {
                     };
                     job.schedule();
                 } catch (Exception e) {
-                    MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.E_R_R_O_R, ExceptionHelper.getLocalizedMessage(e));
+                    MessageDialogAsync.displayError(Messages.E_R_R_O_R, ExceptionHelper.getLocalizedMessage(e));
                 }
 
                 return Status.OK_STATUS;
