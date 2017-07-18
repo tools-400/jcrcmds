@@ -11,6 +11,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Export-Package: com.jcrcmds.base.shared.exceptions,
+Export-Package: com.jcrcmds.base,
+ com.jcrcmds.base.shared.exceptions,
  com.jcrcmds.base.shared.helper,
  com.jcrcmds.base.shared.logger
