@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JCRCMDS Core (required)
 Bundle-SymbolicName: com.jcrcmds.core;singleton:=true
-Bundle-Version: 1.0.3.b001
+Bundle-Version: 1.0.4.b001
 Bundle-Activator: com.jcrcmds.core.JcrCmdsCorePlugin
 Bundle-Localization: plugin
 Bundle-Vendor: JCRCMDS Project Team
