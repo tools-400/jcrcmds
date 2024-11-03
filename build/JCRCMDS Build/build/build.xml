@@ -555,7 +555,6 @@
             </fileset>
         </copy>
 
-        <!--
         <replace file="${build.upload.dir.home}/${home.page}" token="@VERSION_NUMBER@" value="${build.version}" />
         <replace file="${build.upload.dir.home}/${home.page}" token="@TODAY_YEAR@" value="${today.year}" />
         <replace file="${build.upload.dir.home}/${home.page}" token="@TODAY@" value="${today.timestamp}" />
@@ -570,6 +569,7 @@
         <replace file="${build.upload.dir.home}/${home.page}" token="@PROJECT_BUGS@" value="${build.pages.bugs.url}" />
         <replace file="${build.upload.dir.home}/${home.page}" token="@PLUGIN_NAME@" value="${build.public.project.name}" />
 
+        <!--
         <replace file="${build.upload.dir.home}/${support.page}" token="@VERSION_NUMBER@" value="${build.version}" />
         <replace file="${build.upload.dir.home}/${support.page}" token="@TODAY_YEAR@" value="${today.year}" />
         <replace file="${build.upload.dir.home}/${support.page}" token="@TODAY@" value="${today.timestamp}" />
@@ -581,12 +581,14 @@
         <replace file="${build.upload.dir.home}/${support.page}" token="@HELP_SITE_URL@" value="${target.ide.root.help.site.url}" />
         <replace file="${build.upload.dir.home}/${support.page}" token="@BETA_HELP_SITE_URL@" value="${target.ide.root.beta.help.site.url}" />
         <replace file="${build.upload.dir.home}/${support.page}" token="@PLUGIN_NAME@" value="${build.public.project.name}" />
+        -->
 
         <loadfile property="tmp.home.page" srcfile="${build.upload.dir.home}/${home.page}" />
         <propertyregex property="replace.error.home.page" input="${tmp.home.page}" regexp="${regex.check.variables}" select="\1"/>
         <echo>Found variable: ${replace.error.home.page}</echo>
         <fail if="replace.error.home.page" message="Not all variables have been replaced."/>
 
+        <!--
         <loadfile property="tmp.support.page" srcfile="${build.upload.dir.home}/${support.page}" />
         <propertyregex property="replace.error.support.page" input="${tmp.support.page}" regexp="${regex.check.variables}" select="\1"/>
         <echo>Found variable: ${replace.error.support.page}</echo>
