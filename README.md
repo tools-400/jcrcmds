@@ -6,7 +6,9 @@ The JCRCMDS plug-in is a wrapper plug-in for the JCRCMDS utility of Craig Rutled
 
 Craig Rutledge: http://www.jcrcmds.com/
 
-RDi 9.5.1.3+ update site: https://jcrcmds.sourceforge.net/eclipse/rdi8.0/
+RDi 9.5.1.3+ update site: https://tools-400.github.io/jcrcmds/update-site/eclipse/rdi8.0/
+
+Further information about iRPGUnit are available on the [Jcrcmds Web Site](https://tools-400.github.io/jcrcmds/).
 
 ## Usage
 
