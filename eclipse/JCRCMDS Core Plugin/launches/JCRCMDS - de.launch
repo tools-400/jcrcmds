@@ -56,7 +56,7 @@
         <setEntry value="org.eclipse.albireo.core"/>
     </setAttribute>
     <booleanAttribute key="includeOptional" value="true"/>
-    <stringAttribute key="location" value="${workspace_loc}/../runtime-EclipseApplication-jcrcmds"/>
+    <stringAttribute key="location" value="${workspace_loc}/../runtime-jcrcmds-de"/>
     <booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
     <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
         <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>

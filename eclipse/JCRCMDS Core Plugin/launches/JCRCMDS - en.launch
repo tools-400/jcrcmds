@@ -61,7 +61,7 @@
         <setEntry value="org.eclipse.albireo.core"/>
     </setAttribute>
     <booleanAttribute key="includeOptional" value="true"/>
-    <stringAttribute key="location" value="${workspace_loc}/../runtime-EclipseApplication-jcrcmds"/>
+    <stringAttribute key="location" value="${workspace_loc}/../runtime-jcrcmds-en"/>
     <booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
     <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
         <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
@@ -79,12 +79,12 @@
         <setEntry value="com.google.gson@default:default"/>
         <setEntry value="com.ibm.cic.licensing.common.core@default:default"/>
         <setEntry value="com.ibm.cic.licensing.common.nl1@default:false"/>
-        <setEntry value="com.ibm.cic.licensing.common.p2.lum.touchpoint.nl1@default:default"/>
+        <setEntry value="com.ibm.cic.licensing.common.p2.lum.touchpoint.nl1@default:false"/>
         <setEntry value="com.ibm.cic.licensing.common.p2.lum.touchpoint@default:default"/>
-        <setEntry value="com.ibm.cic.licensing.common.p2.manager.nl1@default:default"/>
+        <setEntry value="com.ibm.cic.licensing.common.p2.manager.nl1@default:false"/>
         <setEntry value="com.ibm.cic.licensing.common.p2.manager@default:default"/>
         <setEntry value="com.ibm.cic.licensing.common.p2.touchpoint@default:default"/>
-        <setEntry value="com.ibm.cic.licensing.common.policy.ui.nl1@default:default"/>
+        <setEntry value="com.ibm.cic.licensing.common.policy.ui.nl1@default:false"/>
         <setEntry value="com.ibm.cic.licensing.common.policy.ui@default:default"/>
         <setEntry value="com.ibm.cic.licensing.common.ui.nl1@default:false"/>
         <setEntry value="com.ibm.cic.licensing.common.ui@default:default"/>
