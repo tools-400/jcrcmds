@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -23,9 +24,9 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
+
+import junit.framework.JUnit4TestAdapter;
 
 /**
  * <b>JUnit 4 Test Case</b>
@@ -76,14 +77,28 @@ public class CheckNLSMessages {
         System.out.println("Testing class: " + clazz.getName());
         for (String locale : locales) {
             Locale.setDefault(new Locale(locale));
+            resetNlsSuffixCache();
 
             Object nlsMessagesObject = getInstance(clazz);
             String resourcePath = getResourcePath(clazz, nlsResource, locale);
-            System.out.println("  Locale: " + resourcePath);
+            System.out.println("  Locale (" + locale + "):" + resourcePath);
 
             Properties properties = getPropertyResourceBundle(nlsMessagesObject, resourcePath);
             checkMessagesForLocale(locale, resourcePath, nlsMessagesObject, properties);
         }
+    }
+
+    /**
+     * Resets the static suffix cache in org.eclipse.osgi.util.NLS so that the
+     * next call to initializeMessages re-evaluates Locale.getDefault(). Without
+     * this, NLS keeps the suffixes from when its class was first loaded
+     * (typically by RDi at startup with osgi.nl=en).
+     */
+    private void resetNlsSuffixCache() throws Exception {
+        Class<?> nlsClass = Class.forName("org.eclipse.osgi.util.NLS");
+        Field nlSuffixes = nlsClass.getDeclaredField("nlSuffixes");
+        nlSuffixes.setAccessible(true);
+        nlSuffixes.set(null, null);
     }
 
     /**
@@ -112,16 +127,18 @@ public class CheckNLSMessages {
 
             // Check
             System.out.println("Testing: " + nlsMessageConstant);
-            assertTrue("ERROR:" + localeInfo + "NLS string must not be NULL or empty: " + nlsMessageConstant, messageText != null
-                && messageText.trim().length() > 0);
+            assertTrue("ERROR:" + localeInfo + "NLS string must not be NULL or empty: " + nlsMessageConstant,
+                messageText != null && messageText.trim().length() > 0);
             assertFalse("ERROR:" + localeInfo + "NLS String must not end with spaces: " + nlsMessageConstant, messageText.endsWith(" "));
             assertNotNull("ERROR:" + localeInfo + "Message text must not be [null]. Missing property: " + nlsMessageConstant + "("
                 + nlsMessagesObject.getClass().getName() + ")", messageText);
             assertTrue("ERROR:" + localeInfo + "Length of message must be greater than zero. Property: " + nlsMessageConstant,
                 messageText.length() > 0);
             try {
-                assertEquals("ERROR:" + localeInfo + "Assigned message text must match text in properties file: " + nlsMessageConstant, messageText,
-                    field.get(null));
+                assertEquals(
+                    "ERROR:" + localeInfo + "Duplicate constant: " + nlsMessageConstant
+                        + "? Assigned message text must match text in properties file: " + messageText + " vs " + field.get(null),
+                    messageText, field.get(null));
             } catch (NullPointerException e) {
                 assertTrue("ERROR:" + localeInfo + "'static' modifier missing for: " + field.getName(), false);
             }
@@ -149,7 +166,9 @@ public class CheckNLSMessages {
      */
     private Object getInstance(Class<?> aClass) throws Exception {
 
-        URL[] urls = ((URLClassLoader)(Thread.currentThread().getContextClassLoader())).getURLs();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        URL[] urls = getClassLoaderUrls(classLoader);
+
         URLClassLoader loader = new URLClassLoader(urls, null);
         Class<?> clazz = loader.loadClass(aClass.getName());
 
@@ -158,6 +177,32 @@ public class CheckNLSMessages {
         Object object = constructor.newInstance(new Object[0]);
 
         return object;
+    }
+
+    /**
+     * Gets URLs from classloader, handling both Java 8 (URLClassLoader) and
+     * Java 9+ (built-in app classloader).
+     */
+    private URL[] getClassLoaderUrls(ClassLoader classLoader) {
+
+        if (classLoader instanceof URLClassLoader) {
+            // Java 8 and earlier
+            return ((URLClassLoader)classLoader).getURLs();
+        }
+
+        // Java 9+: Use java.class.path system property
+        String classPath = System.getProperty("java.class.path");
+        String[] paths = classPath.split(System.getProperty("path.separator"));
+        URL[] urls = new URL[paths.length];
+
+        for (int i = 0; i < paths.length; i++) {
+            try {
+                urls[i] = new java.io.File(paths[i]).toURI().toURL();
+            } catch (java.net.MalformedURLException e) {
+                throw new RuntimeException("Invalid classpath entry: " + paths[i], e);
+            }
+        }
+        return urls;
     }
 
     /**
