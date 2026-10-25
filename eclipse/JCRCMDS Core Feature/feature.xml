@@ -20,9 +20,7 @@ this distribution, and is available at http://www.eclipse.org/legal/cpl-v10.html
    </license>
 
    <url>
-      <discovery label="JCRCMDS Project Home" url="https://sourceforge.net/projects/jcrcmds/"/>
-      <discovery label="Craig Rutledge - Open Source iSeries Tools" url="http://www.jcrcmds.com/"/>
-      <discovery label="Tools/400" url="http://www.tools400.de"/>
+      <update label="JCRCMDS - Remote Update Site" url="https://tools-400.github.io/jcrcmds/update-site/eclipse/rdi8.0/"/>
    </url>
 
    <plugin
