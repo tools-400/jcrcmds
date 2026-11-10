@@ -17,3 +17,7 @@ Further information about iRPGUnit are available on the [Jcrcmds Web Site](https
 3) Select "JCRCMDS -> Convert all" or "JCRCMDS -> Convert selection" to start the conversion.
 
 Then the plug-in uploads the entire source member or the selected lines to the host, executes command JCRHFD, downloads the converted source lines and updates the source member.
+
+## Liability
+
+This software is free and provided without warranty. You use it at your own risk: test it with non-critical data first, and back up your data before you use it. The [license](LICENSE) applies in addition.
